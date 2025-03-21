@@ -30,8 +30,6 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 
 If our work is useful for your research, please consider citing:
 
-# Chengyan Deng
-
 ```
 @inproceedings{MaIR,
   title={MaIR: A Locality- and Continuity-Preserving Mamba for Image Restoration},
