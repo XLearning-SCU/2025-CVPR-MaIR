@@ -182,7 +182,7 @@ def inverse_ids_generate(origin_ids, K=4):
     return inverse_ids
 
 
-def losh_ids_generate(inp_shape, scan_len=4, K=4):
+def mair_ids_generate(inp_shape, scan_len=4, K=4):
     inp_b, inp_c, inp_h, inp_w = inp_shape
 
     # inp_idx = create_idx(1, inp_c, inp_h, inp_w)
@@ -195,7 +195,7 @@ def losh_ids_generate(inp_shape, scan_len=4, K=4):
     return xs_scan_ids, xs_inverse_ids
 
 
-def losh_shift_ids_generate(inp_shape, scan_len=4, shift_len=0, K=4):
+def mair_shift_ids_generate(inp_shape, scan_len=4, shift_len=0, K=4):
     inp_b, inp_c, inp_h, inp_w = inp_shape
 
     # create_idx函数运行时间：0.0050699710845947266 秒
@@ -219,7 +219,7 @@ def losh_shift_ids_generate(inp_shape, scan_len=4, shift_len=0, K=4):
     return xs_scan_ids, xs_inverse_ids
 
 
-def losh_ids_scan(inp, xs_scan_ids, bkdl=False, K=4):
+def mair_ids_scan(inp, xs_scan_ids, bkdl=False, K=4):
     '''
         inp: B, C, H, W
         xs_scan_ids: K, 1, L
@@ -239,7 +239,7 @@ def losh_ids_scan(inp, xs_scan_ids, bkdl=False, K=4):
         inp_flatten = torch.cat((y1, y2, y3, y4), dim=1).reshape(B, 4, -1)
     return inp_flatten
 
-def losh_ids_inverse(inp, xs_scan_ids, shape=None):
+def mair_ids_inverse(inp, xs_scan_ids, shape=None):
     '''
         inp: (B, K, -1, L)
         xs_scan_ids: (1, K, 1, L)
@@ -269,9 +269,9 @@ def test_time():
     print("inp:", inp_rgb)
 
     # Original
-    xs_scan_ids, xs_inverse_ids = losh_ids_generate(inp.shape, scan_len=scan_len, K=4)
-    xs = losh_ids_scan(inp_rgb, xs_scan_ids, bkdl=True)
-    inp_flatten = losh_ids_inverse(xs, xs_inverse_ids, shape=(inp_b, inp_c, inp_h, inp_w))
+    xs_scan_ids, xs_inverse_ids = mair_ids_generate(inp.shape, scan_len=scan_len, K=4)
+    xs = mair_ids_scan(inp_rgb, xs_scan_ids, bkdl=True)
+    inp_flatten = mair_ids_inverse(xs, xs_inverse_ids, shape=(inp_b, inp_c, inp_h, inp_w))
 
     inp_flatten = inp_flatten.chunk(4, dim=1)
     print("recovered input:")
@@ -283,8 +283,6 @@ def test_time():
 
 if __name__ == '__main__':
     # torch.set_default_device(1)
-    torch.cuda.set_device(7)
-
     start_time = time.time()
     result = test_time()
     end_time = time.time()

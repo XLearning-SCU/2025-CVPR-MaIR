@@ -3,7 +3,7 @@ import torch
 from os import path as osp
 import sys
 # for some possible IMPORT ERROR
-sys.path.append('/xlearning/boyun/codes/MambaIR')
+sys.path.append('/xlearning/boyun/codes/MaIR')
 from basicsr.data import build_dataloader, build_dataset
 from basicsr.models import build_model
 from basicsr.utils import get_root_logger, get_time_str, make_exp_dirs
