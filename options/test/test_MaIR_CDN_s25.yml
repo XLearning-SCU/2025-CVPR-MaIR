@@ -1,0 +1,90 @@
+# general settings
+name: test_MaIR_CDN_s15
+model_type: MambaIRModel
+scale: 1
+num_gpu: 8
+manual_seed: 10
+
+datasets:
+  test_1:  # the 2nd test dataset
+    name: McMaster
+    type: PairedImageDataset
+    task: denoising_color
+    noise: 15
+    dataroot_gt: /xlearning/boyun/datasets/Test/McMaster
+    dataroot_lq: /xlearning/boyun/datasets/Test/McMaster
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_2:  # the 1st test dataset
+    name: Kodak24
+    type: PairedImageDataset
+    task: denoising_color
+    noise: 15
+    dataroot_gt: /xlearning/boyun/datasets/Test/Kodak24
+    dataroot_lq: /xlearning/boyun/datasets/Test/Kodak24
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_3:  # the 3rd test dataset
+    name: CBSD68
+    type: PairedImageDataset
+    task: denoising_color
+    noise: 15
+    dataroot_gt: /xlearning/boyun/datasets/Test/CBSD68
+    dataroot_lq: /xlearning/boyun/datasets/Test/CBSD68
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_4:  # the 4th test dataset
+    name: Urban100
+    type: PairedImageDataset
+    task: denoising_color
+    noise: 15
+    dataroot_gt: /xlearning/boyun/datasets/Test/Urban100
+    dataroot_lq: /xlearning/boyun/datasets/Test/Urban100
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+
+network_g:
+  type: MaIR
+  upscale: 1
+  in_chans: 3
+  img_range: 1.
+  d_state: 16
+  depths: [6, 6, 6, 6, 6, 6]
+  embed_dim: 180
+  ssm_ratio: 1.3
+  mlp_ratio: 2.0
+  upsampler: ~
+  resi_connection: '1conv'
+  
+  img_size: 128
+  dynamic_ids: False
+  batch_size: 1
+  scan_len: 4
+
+# path
+path:
+  pretrain_network_g: ckpt/MaIR_CDN_s25.pth
+  strict_load_g: true
+
+# validation settings
+val:
+  save_img: false
+  suffix: ~  # add suffix to saved images, if None, use exp name
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: true

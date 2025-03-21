@@ -15,7 +15,7 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 * [X] Update codes of networks
 * [X] Upload checkpoint
 * [X] Update the codes of calculating flops and params through fvcore
-* [ ] update options for SR
+* [X] update options for SR
 * [X] update options for lightSR
 * [ ] update options for denoising
 * [ ] update options for deblurring
@@ -26,9 +26,13 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 * [ ] update environments
 * [ ] update homepage
 
+# Chengyan Deng
+
 ## Citations
 
 If our work is useful for your research, please consider citing:
+
+# Chengyan Deng
 
 ```
 @inproceedings{MaIR,
