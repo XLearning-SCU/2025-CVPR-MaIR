@@ -1,0 +1,90 @@
+# general settings
+name: test_MaIR_T_lightSR_x4
+model_type: MambaIRModel
+scale: 4
+num_gpu: 2
+manual_seed: 10
+
+datasets:
+  test_1:  # the 1st test dataset
+    name: Set5
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/SR/Test/Set5/HR
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Set5/LR_bicubic/X4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_2:  # the 2nd test dataset
+    name: Set14
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/SR/Test/Set14/HR
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Set14/LR_bicubic/X4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_3:  # the 3rd test dataset
+    name: B100
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/SR/Test/B100/HR
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/B100/LR_bicubic/X4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_4:  # the 4th test dataset
+    name: Urban100
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/SR/Test/Urban100/HR
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Urban100/LR_bicubic/X4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+  test_5:  # the 5th test dataset
+    name: Manga109
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/SR/Test/Manga109/HR
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Manga109/LR_bicubic/X4
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+network_g:
+  type: MaIR
+  upscale: 4
+  in_chans: 3
+  img_range: 1.0
+  d_state: 1
+  depths: [6, 6, 6, 6]
+  embed_dim: 60
+  ssm_ratio: 1.1
+  mlp_ratio: 1.6
+  upsampler: pixelshuffledirect
+  resi_connection: 1conv
+  
+  img_size: 64
+  dynamic_ids: False
+  batch_size: 16
+  scan_len: 8
+
+# path
+path:
+  pretrain_network_g: ckpt/MaIR_T_lightSR_x4.pth
+  strict_load_g: true
+
+# validation settings
+val:
+  save_img: false
+  suffix: ~  # add suffix to saved images, if None, use exp name
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 4
+      test_y_channel: true
+    ssim:
+      type: calculate_ssim
+      crop_border: 4
+      test_y_channel: true
