@@ -1,0 +1,120 @@
+# general settings for image SR training
+name: train_MaIR_S_lightSR_x3
+model_type: MambaIRModel
+scale: 3
+num_gpu: 2
+manual_seed: 10
+
+# dataset and data loader settings
+datasets:
+  train:
+    task: SR
+    name: DIV2K
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/DIV2K/DIV2K_train_HR
+    dataroot_lq: /xlearning/boyun/datasets/DIV2K/DIV2K_train_LR_bicubic/X3/
+    filename_tmpl: '{}x3'
+    io_backend:
+      type: disk
+
+    gt_size: 192
+    use_hflip: true
+    use_rot: true
+
+    # data loader
+    use_shuffle: true
+    num_worker_per_gpu: 32
+    batch_size_per_gpu: 16
+    dataset_enlarge_ratio: 500
+    prefetch_mode: ~
+
+  val:
+    name: Urban100
+    type: PairedImageDataset
+    dataroot_gt: /xlearning/boyun/datasets/SR/Test/Urban100/HR
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Urban100/LR_bicubic/X3/
+    filename_tmpl: '{}'
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: MaIR
+  upscale: 3
+  in_chans: 3
+  img_range: 1.
+  d_state: 16
+  depths: [6, 6, 6, 6]
+  embed_dim: 60
+  ssm_ratio: 1.4
+  mlp_ratio: 1.6
+  upsampler: 'pixelshuffledirect'
+  resi_connection: '1conv'
+  
+  img_size: 64
+  dynamic_ids: False
+  batch_size: 16
+  scan_len: 4
+
+# path
+path:
+  pretrain_network_g: ckpt/MaIR_S_lightSR_x2.pth
+  strict_load_g: false
+  resume_state: ~
+
+# training settings, we finetune the pretrained X2 model for 500k iterations following MambaIR
+train:
+  optim_g:
+    type: Adam
+    lr: !!float 2e-4
+    weight_decay: 0
+    betas: [0.9, 0.99]
+
+  scheduler:
+    type: MultiStepLR
+    milestones: [250000, 400000, 450000, 475000]
+    gamma: 0.5
+
+  total_iter: 500000
+  warmup_iter: -1  # no warm up
+
+  # losses
+  pixel_opt:
+    type: L1Loss
+    loss_weight: 1.0
+    reduction: mean
+
+# validation settings
+val:
+  # val_freq and val_freq_final is used for trainF.py, where first 400000 iters we only validate model every 25k iters, after that we validate every 5k iters
+  # It is mainly because that the training is not stable at the beginning, and validation is also time consuming since IO speed of our GPU is not enough.
+  # So we validate less frequently at the beginning.
+  val_freq: !!float 25e3
+  val_freq_final: !!float 5e3
+  val_milestone: 400000 
+
+  save_img: false
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 3
+      test_y_channel: true
+    ssim: 
+      type: calculate_ssim
+      crop_border: 3
+      test_y_channel: true
+
+# logging settings
+logger:
+  print_freq: 200
+  save_checkpoint_freq: !!float 5e3
+  use_tb_logger: true
+  wandb:
+    project: ~
+    resume_id: ~
+
+# dist training settings
+dist_params:
+  backend: nccl
+  port: 29500
