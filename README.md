@@ -17,7 +17,7 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 * [X] Update the codes of calculating flops and params through fvcore
 * [X] update options for SR
 * [X] update options for lightSR
-* [ ] update options for denoising
+* [X] update options for denoising
 * [ ] update options for deblurring
 * [ ] update options for dehazing
 * [ ] update training and testing commands
@@ -26,9 +26,7 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 * [ ] update environments
 * [ ] update homepage
 
-# Chengyan Deng
-
-## Citations
+# Citations
 
 If our work is useful for your research, please consider citing:
 
