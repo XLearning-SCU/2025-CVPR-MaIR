@@ -23,6 +23,7 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 * [ ] update training and testing commands
 * [ ] update unet-version
 * [ ] update readme
+* [ ] update environments
 * [ ] update homepage
 
 ## Citations

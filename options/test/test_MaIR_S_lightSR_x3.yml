@@ -63,6 +63,7 @@ network_g:
   mlp_ratio: 1.6
   upsampler: pixelshuffledirect
   resi_connection: 1conv
+  
   img_size: 64
   dynamic_ids: False
   batch_size: 16

@@ -1,8 +1,8 @@
 # general settings
-name: test_MaIR_S_lightSR_x4
+name: test_MaIR_SR_x4
 model_type: MambaIRModel
 scale: 4
-num_gpu: 2
+num_gpu: 8
 manual_seed: 10
 
 datasets:
@@ -57,21 +57,21 @@ network_g:
   in_chans: 3
   img_range: 1.0
   d_state: 16
-  depths: [6, 6, 6, 6]
-  embed_dim: 60
-  ssm_ratio: 1.4
-  mlp_ratio: 1.6
-  upsampler: pixelshuffledirect
-  resi_connection: 1conv
-  
+  depths: [6, 6, 6, 6, 6, 6]
+  embed_dim: 180
+  ssm_ratio: 2.0
+  mlp_ratio: 2.5
+  upsampler: 'pixelshuffle'
+  resi_connection: '1conv'
+
   img_size: 64
   dynamic_ids: False
-  batch_size: 16
-  scan_len: 4
+  batch_size: 4
+  scan_len: 8
 
 # path
 path:
-  pretrain_network_g: ckpt/MaIR_S_lightSR_x4.pth
+  pretrain_network_g: ckpt/MaIR_SR_x4.pth
   strict_load_g: true
 
 # validation settings

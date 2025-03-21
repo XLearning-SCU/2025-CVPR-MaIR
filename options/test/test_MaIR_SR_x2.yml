@@ -1,8 +1,8 @@
 # general settings
-name: test_MaIR_S_lightSR_x4
+name: test_MaIR_SR_x2
 model_type: MambaIRModel
-scale: 4
-num_gpu: 2
+scale: 2
+num_gpu: 8
 manual_seed: 10
 
 datasets:
@@ -10,7 +10,7 @@ datasets:
     name: Set5
     type: PairedImageDataset
     dataroot_gt: /xlearning/boyun/datasets/SR/Test/Set5/HR
-    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Set5/LR_bicubic/X4
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Set5/LR_bicubic/X2
     filename_tmpl: '{}'
     io_backend:
       type: disk
@@ -19,16 +19,16 @@ datasets:
     name: Set14
     type: PairedImageDataset
     dataroot_gt: /xlearning/boyun/datasets/SR/Test/Set14/HR
-    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Set14/LR_bicubic/X4
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Set14/LR_bicubic/X2
     filename_tmpl: '{}'
     io_backend:
       type: disk
-
+#
   test_3:  # the 3rd test dataset
     name: B100
     type: PairedImageDataset
     dataroot_gt: /xlearning/boyun/datasets/SR/Test/B100/HR
-    dataroot_lq: /xlearning/boyun/datasets/SR/Test/B100/LR_bicubic/X4
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/B100/LR_bicubic/X2
     filename_tmpl: '{}'
     io_backend:
       type: disk
@@ -37,7 +37,7 @@ datasets:
     name: Urban100
     type: PairedImageDataset
     dataroot_gt: /xlearning/boyun/datasets/SR/Test/Urban100/HR
-    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Urban100/LR_bicubic/X4
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Urban100/LR_bicubic/X2
     filename_tmpl: '{}'
     io_backend:
       type: disk
@@ -46,32 +46,32 @@ datasets:
     name: Manga109
     type: PairedImageDataset
     dataroot_gt: /xlearning/boyun/datasets/SR/Test/Manga109/HR
-    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Manga109/LR_bicubic/X4
+    dataroot_lq: /xlearning/boyun/datasets/SR/Test/Manga109/LR_bicubic/X2
     filename_tmpl: '{}'
     io_backend:
       type: disk
 
 network_g:
   type: MaIR
-  upscale: 4
+  upscale: 2
   in_chans: 3
   img_range: 1.0
   d_state: 16
-  depths: [6, 6, 6, 6]
-  embed_dim: 60
-  ssm_ratio: 1.4
-  mlp_ratio: 1.6
-  upsampler: pixelshuffledirect
-  resi_connection: 1conv
+  depths: [6, 6, 6, 6, 6, 6]
+  embed_dim: 180
+  ssm_ratio: 2.0
+  mlp_ratio: 2.5
+  upsampler: 'pixelshuffle'
+  resi_connection: '1conv'
   
   img_size: 64
   dynamic_ids: False
-  batch_size: 16
-  scan_len: 4
+  batch_size: 4
+  scan_len: 8
 
 # path
 path:
-  pretrain_network_g: ckpt/MaIR_S_lightSR_x4.pth
+  pretrain_network_g: ckpt/MaIR_SR_x2.pth
   strict_load_g: true
 
 # validation settings
@@ -82,9 +82,9 @@ val:
   metrics:
     psnr: # metric name, can be arbitrary
       type: calculate_psnr
-      crop_border: 4
+      crop_border: 2
       test_y_channel: true
     ssim:
       type: calculate_ssim
-      crop_border: 4
+      crop_border: 2
       test_y_channel: true
