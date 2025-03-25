@@ -1,0 +1,60 @@
+# general settings
+name: test_MaIR_RealDN
+model_type: ImageCleanModel
+scale: 1
+num_gpu: 1
+manual_seed: 100
+
+datasets:
+  test_1:  
+    name: SIDD-Val
+    type: Dataset_PairedImage
+    dataroot_gt:  /xlearning/boyun/datasets/RealDN/val/crop_val/target_crops
+    dataroot_lq:  /xlearning/boyun/datasets/RealDN/val/crop_val/input_crops
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: MaIRUNet
+  inp_channels: 3
+  out_channels: 3
+  dim: 48
+  num_blocks: [4, 6, 6, 8]
+  num_refinement_blocks: 4
+
+  ssm_ratio: 2.0 
+  flp_ratio: 4.0
+  mlp_ratio: 1.5 
+  bias: False
+  dual_pixel_task: False
+
+  img_size: 128
+  scan_len: 4
+  batch_size: 8
+  dynamic_ids: False
+
+path:
+  pretrain_network_g: ckpt/MaIR_RealDN.ckpt
+  strict_load_g: true
+
+# validation settings
+val:
+  suffix: ~  # add suffix to saved images, if None, use exp name
+  window_size: 8
+  save_img: false
+  rgb2bgr: true
+  use_image: false
+  max_minibatch: 8
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+    ssim:
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
+
+
