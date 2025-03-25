@@ -21,6 +21,13 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s25.yml --launcher pytorch
 # Training commands for Color Denoising with sigma=50
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s50.yml --launcher pytorch
+
+# Testing commands for Color Denoising with sigma=15
+python basicsr/test.py -opt options/test/test_MaIR_CDN_s15.yml
+# Testing commands for Color Denoising with sigma=25
+python basicsr/test.py -opt options/test/test_MaIR_CDN_s25.yml
+# Testing commands for Color Denoising with sigma=50
+python basicsr/test.py -opt options/test/test_MaIR_CDN_s50.yml
 ```
 
 Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to use torchrun for training, you can replace it with `python -m torch.distributed.launch` for training.
@@ -35,12 +42,13 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] update options for SR
 * [X] update options for lightSR
 * [X] update options for denoising
-* [ ] update options for realDN
+* [X] update options for realDN
 * [X] update options for deblurring
 * [ ] update options for dehazing
 * [X] Update MaIR+
 * [ ] update training and testing commands
 * [X] update unet-version
+* [ ] Improve codes of calculating FLOPs and Params.
 * [ ] update readme
 * [ ] update environments
 * [ ] update homepage
