@@ -20,6 +20,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1
 
 Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to use torchrun for training, you can replace it with `python -m torch.distributed.launch` for training.
 
+For MaIR+: You could change the model_type in test options to MaIRPlusModel for MaIR+.
+
 ## TODO
 
 * [X] Update codes of networks
@@ -30,7 +32,7 @@ Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to u
 * [X] update options for denoising
 * [ ] update options for deblurring
 * [ ] update options for dehazing
-* [ ] Update MaIR+
+* [X] Update MaIR+
 * [ ] update training and testing commands
 * [ ] update unet-version
 * [ ] update readme

@@ -1,6 +1,6 @@
 # general settings
 name: test_MaIR_CDN_s15
-model_type: MambaIRModel
+model_type: MambaIRModel # MaIRPlusModel for MaIR+
 scale: 1
 num_gpu: 8
 manual_seed: 10

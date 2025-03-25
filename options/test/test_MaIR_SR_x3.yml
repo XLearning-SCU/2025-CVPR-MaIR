@@ -1,6 +1,6 @@
 # general settings
 name: test_MaIR_SR_x3
-model_type: MambaIRModel
+model_type: MambaIRModel # MaIRPlusModel for MaIR+
 scale: 3
 num_gpu: 8
 manual_seed: 10
