@@ -10,6 +10,16 @@ There are the codes of MaIR. I will reformulate codes and options very very soon
 
 CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyynLg-Kfu-mviq24WdVkJu-S3M?usp=sharing).
 
+## Guidance for Training and Testing
+
+### Training and Testing on Color Image Denoising
+
+```
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s15.yml --launcher pytorch
+```
+
+Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to use torchrun for training, you can replace it with `python -m torch.distributed.launch` for training.
+
 ## TODO
 
 * [X] Update codes of networks
@@ -20,13 +30,14 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 * [X] update options for denoising
 * [ ] update options for deblurring
 * [ ] update options for dehazing
+* [ ] Update MaIR+
 * [ ] update training and testing commands
 * [ ] update unet-version
 * [ ] update readme
 * [ ] update environments
 * [ ] update homepage
 
-# Citations
+## Citations
 
 If our work is useful for your research, please consider citing:
 

@@ -404,14 +404,7 @@ class RMB(nn.Module):
         flops += self.conv_blk.flops()
         # flops of input * self.skip_scale2 and residual
         flops += self.hidden_dim * H * W * 2 
-
-        # print(self.self_attention.flops(), self.conv_blk.flops())
-        # flops_mlp = self.hidden_dim * self.hidden_dim * H * W * 4 * 2
-        # print("flops of attn:: %.2f M, Per:%.2f"%(self.self_attention.flops()/1e6, self.self_attention.flops()/flops))
-        # print("flops of conv_blk:: %.2f M, Per:%.2f"%(self.conv_blk.flops()/1e6, self.conv_blk.flops()/flops))
-        # print("Ratio of Convblock/MLP:: %.2f"%(self.conv_blk.flops()/flops_mlp))
-        # print(flops/1e6)
-
+        
         return flops
     
 
@@ -692,7 +685,6 @@ class MaIR(nn.Module):
         x = self.patch_embed(x) # N,L,C
         x = self.pos_drop(x)
 
-        # start = time.time()
         if self.dynamic_ids or (self.image_size != (H, W)):
             xs_scan_ids, xs_inverse_ids = mair_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len)# [B,H,W,C]
             xs_shift_scan_ids, xs_shift_inverse_ids = mair_shift_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
@@ -702,14 +694,9 @@ class MaIR(nn.Module):
             for layer in self.layers:
                 x = layer(x, (xs_scan_ids, xs_inverse_ids, xs_shift_scan_ids, xs_shift_inverse_ids), x_size)
         else:
-            # xs_scan_ids, xs_inverse_ids = self.xs_scan_ids, self.xs_inverse_ids
-            # xs_shift_scan_ids, xs_shift_inverse_ids = self.xs_shift_scan_ids, self.xs_shift_inverse_ids
             for layer in self.layers:
                 x = layer(x, (self.xs_scan_ids, self.xs_inverse_ids, self.xs_shift_scan_ids, self.xs_shift_inverse_ids), x_size)
-
-        # for layer in self.layers:
-        #     x = layer(x, (xs_scan_ids, xs_inverse_ids, xs_shift_scan_ids, xs_shift_inverse_ids), x_size)
-
+        
         x = self.norm(x)  # b seq_len c
         x = self.patch_unembed(x, x_size)
 
