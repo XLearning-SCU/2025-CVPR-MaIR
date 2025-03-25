@@ -2,13 +2,32 @@
 
 [[Paper](https://arxiv.org/abs/2412.20066)]
 
-Boyun Li, Haiyu Zhao, Wenxin Wang, Peng Hu, Yuanbiao Gou*, Xi Peng*
+[Boyun Li](https://liboyun.github.io/), [Haiyu Zhao](https://pandint.github.io/), [Wenxin Wang](https://hi-wenxin.github.io/), [Peng Hu](https://penghu-cs.github.io/), [Yuanbiao Gou](https://ybgou.github.io/)\*, [Xi Peng](https://pengxi.me/)\*
 
 > **Abstract:**  Recent advancements in Mamba have shown promising results in image restoration. These methods typically flatten 2D images into multiple distinct 1D sequences along rows and columns, process each sequence independently using selective scan operation, and recombine them to form the outputs. However, such a paradigm overlooks two vital aspects: i) the local relationships and spatial continuity inherent in natural images, and ii) the discrepancies among sequences unfolded through totally different ways. To overcome the drawbacks, we explore two problems in Mamba-based restoration methods: i) how to design a scanning strategy preserving both locality and continuity while facilitating restoration, and ii) how to aggregabuildMaIR_SmallbuildMaIR_Smallte the distinct sequences unfolded in totally different ways. To address these problems, we propose a novel Mamba-based Image Restoration model (MaIR), which consists of Nested S-shaped Scanning strategy (NSS) and Sequence Shuffle Attention block (SSA). Specifically, NSS preserves locality and continuity of the input images through the stripe-based scanning region and the S-shaped scanning path, respectively. SSA aggregates sequences through calculating attention weights within the corresponding channels of different sequences. Thanks to NSS and SSA, MaIR surpasses 40 baselines across 14 challenging datasets, achieving state-of-the-art performance on the tasks of image super-resolution, denoising, deblurring and dehazing.
 
 There are the codes of MaIR. I will reformulate codes and options very very soon. (within 1-2 weeks).
 
 CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyynLg-Kfu-mviq24WdVkJu-S3M?usp=sharing).
+
+## Environment & Dependencies
+To ensure seamless execution of our project, the following dependencies are required:
+* Python == 3.8.11
+* Pytorch == 2.0.1
+* cudatoolkit == 11.0.221
+  
+To leverage the SSO, the mamba_ssm library is needed to install with the folllowing command:
+
+```bash
+pip install causal_conv1d==1.0.0
+pip install mamba_ssm==1.0.1
+```
+
+We also export our conda virtual environment as environment.yaml. You can use the following command to create the environment.
+```bash
+conda env create -f environment.yaml
+```
+This ensures all dependencies are correctly installed, allowing you to focus on running and experimenting with the code.
 
 ## Guidance for Training and Testing
 
@@ -110,7 +129,7 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] update unet-version
 * [X] Improve codes of calculating FLOPs and Params.
 * [ ] update readme
-* [ ] update environments
+* [X] update environments
 * [ ] update homepage
 
 ## Citations
