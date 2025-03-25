@@ -51,6 +51,8 @@ CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s25.yml --launcher pytorch
 # Training commands for Color Denoising with sigma=50
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s50.yml --launcher pytorch
+# Training commands for Real Denoising (1-2 weeks)
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 realDenoising/basicsr/trainF.py -opt realDenoising/options/train/train_MaIR_RealDN.yml --launcher pytorch
 
 # Testing commands for Color Denoising with sigma=15
 python basicsr/test.py -opt options/test/test_MaIR_CDN_s15.yml
@@ -58,17 +60,33 @@ python basicsr/test.py -opt options/test/test_MaIR_CDN_s15.yml
 python basicsr/test.py -opt options/test/test_MaIR_CDN_s25.yml
 # Testing commands for Color Denoising with sigma=50
 python basicsr/test.py -opt options/test/test_MaIR_CDN_s50.yml
+# Testing commands for Real Denoising
+python basicsr/test.py -opt options/test/test_MaIR_RealDN.yml
 ```
 
 
 ### Training and Testing Commands on Motion Debluring
 
 ```bash
-# Training commands for Motion Debluring (~1 week)
+# Training commands for Motion Debluring (1-2 weeks)
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 realDenoising/basicsr/trainF.py -opt realDenoising/options/train/train_MaIR_MotionDeblur.yml --launcher pytorch
 
 # Testing commands for Motion Debluring
 python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_MotionDeblur.yml
+```
+
+### Training and Testing Commands on Image Dehazing
+
+```bash
+# Training commands for Image Dehazing (~3 days)
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=8 --master_port=1268 realDenoising/basicsr/trainF.py -opt realDenoising/options/train/train_MaIR_ITS.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=8 --master_port=1268 realDenoising/basicsr/trainF.py -opt realDenoising/options/train/train_MaIR_OTS.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=8 --master_port=1268 realDenoising/basicsr/trainF.py -opt realDenoising/options/train/train_MaIR_R6K.yml --launcher pytorch
+
+# Testing commands for Image Dehazing
+python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_ITS.yml
+python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_OTS.yml
+python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_R6K.yml
 ```
 
 
@@ -88,7 +106,7 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] update options for deblurring
 * [X] update options for dehazing
 * [X] Update MaIR+
-* [ ] update training and testing commands
+* [x] update training and testing commands
 * [X] update unet-version
 * [ ] Improve codes of calculating FLOPs and Params.
 * [ ] update readme

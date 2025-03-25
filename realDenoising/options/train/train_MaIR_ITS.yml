@@ -96,9 +96,9 @@ train:
 
 # validation settings
 val:
-  val_freq: !!float 800e3
+  val_freq: !!float 100e3
   val_freq_final: !!float 5e3
-  val_milestone: 700000 
+  val_milestone: 600000 
 
   window_size: 8
   save_img: false

@@ -2,7 +2,7 @@
 name: train_MaIR_R6K
 model_type: ImageCleanModel
 scale: 1
-num_gpu: 4  # set num_gpu: 0 for cpu mode
+num_gpu: 2  # set num_gpu: 0 for cpu mode
 manual_seed: 100
 
 # dataset and data loader settings
@@ -23,12 +23,12 @@ datasets:
     num_worker_per_gpu: 32
     batch_size_per_gpu: 6
 
-    mini_batch_sizes: [6, 2]             # Batch size per gpu   
-    iters: [250000, 150000]
+    mini_batch_sizes: [6]             # Batch size per gpu   
+    iters: [700000]
     gt_size: 256   # Max patch size for progressive training
-    gt_sizes: [256, 384]  # Patch sizes for progressive training.
+    gt_sizes: [256]  # Patch sizes for progressive training.
 
-    dataset_enlarge_ratio: 1
+    dataset_enlarge_ratio: 100
     prefetch_mode: ~
 
   val:
@@ -68,13 +68,13 @@ path:
 
 # training settings
 train:
-  total_iter: 400000
+  total_iter: 700000
   warmup_iter: -1 # no warm up
   use_grad_clip: true
 
   scheduler:
     type: CosineAnnealingRestartCyclicLR
-    periods: [100000, 300000]
+    periods: [184000, 516000]
     restart_weights: [1,1]
     eta_mins: [0.0002,0.000001]   
   
@@ -97,12 +97,11 @@ train:
 
 # validation settings
 val:
-  val_freq: !!float 800e3
+  val_freq: !!float 100e3
   val_freq_final: !!float 5e3
-  val_milestone: 300000 
+  val_milestone: 600000 
 
   window_size: 8
-  # val_freq: !!float 4e3
   save_img: false
   rgb2bgr: false
   use_image: false
