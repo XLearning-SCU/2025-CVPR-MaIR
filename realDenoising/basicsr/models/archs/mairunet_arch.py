@@ -14,7 +14,7 @@ from einops import rearrange, repeat
 from functools import partial
 import sys
 sys.path.append('/xlearning/boyun/codes/MaIR/realDenoising')
-from shift_scanf_util import losh_ids_generate, losh_ids_scan, losh_ids_inverse, losh_shift_ids_generate
+from shift_scanf_util import mair_ids_generate, mair_ids_scan, mair_ids_inverse, mair_shift_ids_generate
 
 NEG_INF = -1000000
 
@@ -71,14 +71,11 @@ class Mlp(nn.Module):
         self.fc1 = nn.Linear(in_features, hidden_features)
         self.act = act_layer()
         self.fc2 = nn.Linear(hidden_features, out_features)
-        # self.drop = nn.Dropout(drop)
 
     def forward(self, x):
         x = self.fc1(x)
         x = self.act(x)
-        # x = self.drop(x)
         x = self.fc2(x)
-        # x = self.drop(x)
         return x
 
     def flops(self):
@@ -240,19 +237,11 @@ class LoSh2D(nn.Module):
 
         xs_scan_ids, xs_inverse_ids = losh_ids
 
-        xs = losh_ids_scan(x, xs_scan_ids)
-        # x_hwwh = torch.stack([x.view(B, -1, L), torch.transpose(x, dim0=2, dim1=3).contiguous().view(B, -1, L)], dim=1).view(B, 2, -1, L)
-        # xs = torch.cat([x_hwwh, torch.flip(x_hwwh, dims=[-1])], dim=1) # (1, 4, 192, 3136)
+        xs = mair_ids_scan(x, xs_scan_ids)
 
-        if True:
-            x_dbl = F.conv1d(xs.reshape(B, -1, L), self.x_proj_weight.reshape(-1, D, 1), bias=(x_proj_bias.reshape(-1) if x_proj_bias is not None else None), groups=K)
-            dts, Bs, Cs = torch.split(x_dbl.reshape(B, K, -1, L), [R, N, N], dim=2)
-            # dts = F.conv1d(dts.contiguous().view(B, -1, L), dt_projs_weight.view(K * D, -1, 1), groups=K)
-            dts = F.conv1d(dts.reshape(B, -1, L), self.dt_projs_weight.reshape(K * D, -1, 1), groups=K)
-        else:
-            x_dbl = torch.einsum("b k d l, k c d -> b k c l", xs.view(B, K, -1, L), self.x_proj_weight)
-            dts, Bs, Cs = torch.split(x_dbl, [self.dt_rank, self.d_state, self.d_state], dim=2)
-            dts = torch.einsum("b k r l, k d r -> b k d l", dts.view(B, K, -1, L), self.dt_projs_weight)
+        x_dbl = F.conv1d(xs.reshape(B, -1, L), self.x_proj_weight.reshape(-1, D, 1), bias=(x_proj_bias.reshape(-1) if x_proj_bias is not None else None), groups=K)
+        dts, Bs, Cs = torch.split(x_dbl.reshape(B, K, -1, L), [R, N, N], dim=2)
+        dts = F.conv1d(dts.reshape(B, -1, L), self.dt_projs_weight.reshape(K * D, -1, 1), groups=K)
         
         xs = xs.float().view(B, -1, L)
         dts = dts.contiguous().float().view(B, -1, L) # (b, k * d, l)
@@ -270,11 +259,7 @@ class LoSh2D(nn.Module):
         ).view(B, K, -1, L)
         assert out_y.dtype == torch.float
 
-        return losh_ids_inverse(out_y, xs_inverse_ids, shape=(B, -1, H, W)) #B, C, L
-        # inv_y = torch.flip(out_y[:, 2:4], dims=[-1]).view(B, 2, -1, L)
-        # wh_y = torch.transpose(out_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        # invwh_y = torch.transpose(inv_y[:, 1].view(B, -1, W, H), dim0=2, dim1=3).contiguous().view(B, -1, L)
-        # return torch.cat((out_y[:, 0], inv_y[:, 0], wh_y, invwh_y),dim=1).reshape(B, -1, H, W)
+        return mair_ids_inverse(out_y, xs_inverse_ids, shape=(B, -1, H, W)) #B, C, L
 
     def forward(self, x: torch.Tensor, losh_ids, **kwargs):
         B, H, W, C = x.shape
@@ -284,22 +269,12 @@ class LoSh2D(nn.Module):
 
         x = x.permute(0, 3, 1, 2).contiguous()
         x = self.act(self.conv2d(x))
-        # y1, y2, y3, y4 = self.forward_core(x, losh_ids)
-        # assert y1.dtype == torch.float32
-        # y1, y2, y3, y4 = y1.reshape(B, -1, H, W), y2.reshape(B, -1, H, W), y3.reshape(B, -1, H, W), y4.reshape(B, -1, H, W)
-        # y_cat = torch.cat((y1, y2, y3, y4),dim=1)
-        # attn = self.gating(y_cat)
-        # attn1, attn2, attn3, attn4 = torch.chunk(attn, 4, dim=1)
-        # y = y1*attn[:,0:1] + y2*attn[:,1:2] + y3*attn[:,2:3] + y4*attn[:,3:4]
-        # y = y1*attn1 + y2*attn2 + y3*attn3 + y4*attn4
         y = self.forward_core(x, losh_ids)
         assert y.dtype == torch.float32
         y = y * self.gating(y)
         y1, y2, y3, y4 = torch.chunk(y, 4, dim=1)
         y = y1 + y2 + y3 + y4
-        # y = y.reshape
         y = y.permute(0, 2, 3, 1).contiguous()
-        # y = torch.transpose(y, dim0=1, dim1=2).contiguous().view(B, H, W, -1)
         y = self.out_norm(y)
         y = y * F.silu(z)
         out = self.out_proj(y)
@@ -617,15 +592,15 @@ class MaIRUNet(nn.Module):
     def _generate_ids(self, inp_shape):
         B,C,H,W = inp_shape
 
-        xs_scan_ids_l1, xs_inverse_ids_l1 = losh_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len)# [B,H,W,C]
-        xs_scan_ids_l2, xs_inverse_ids_l2 = losh_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len)# [B,H,W,C]
-        xs_scan_ids_l3, xs_inverse_ids_l3 = losh_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len)# [B,H,W,C]
-        xs_scan_ids_lat, xs_inverse_ids_lat = losh_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len)# [B,H,W,C]
+        xs_scan_ids_l1, xs_inverse_ids_l1 = mair_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len)# [B,H,W,C]
+        xs_scan_ids_l2, xs_inverse_ids_l2 = mair_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len)# [B,H,W,C]
+        xs_scan_ids_l3, xs_inverse_ids_l3 = mair_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len)# [B,H,W,C]
+        xs_scan_ids_lat, xs_inverse_ids_lat = mair_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len)# [B,H,W,C]
 
-        xs_shift_scan_ids_l1, xs_shift_inverse_ids_l1 = losh_shift_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
-        xs_shift_scan_ids_l2, xs_shift_inverse_ids_l2 = losh_shift_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
-        xs_shift_scan_ids_l3, xs_shift_inverse_ids_l3 = losh_shift_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
-        xs_shift_scan_ids_lat, xs_shift_inverse_ids_lat = losh_shift_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+        xs_shift_scan_ids_l1, xs_shift_inverse_ids_l1 = mair_shift_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+        xs_shift_scan_ids_l2, xs_shift_inverse_ids_l2 = mair_shift_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+        xs_shift_scan_ids_l3, xs_shift_inverse_ids_l3 = mair_shift_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+        xs_shift_scan_ids_lat, xs_shift_inverse_ids_lat = mair_shift_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
 
         if torch.cuda.is_available():
             self.xs_scan_ids_l1 = xs_scan_ids_l1.cuda()
@@ -681,15 +656,15 @@ class MaIRUNet(nn.Module):
             ids_lat = (self.xs_scan_ids_lat, self.xs_inverse_ids_lat, self.xs_shift_scan_ids_lat, self.xs_shift_inverse_ids_lat)
 
         elif self.dynamic_ids or (not self.training):
-            xs_scan_ids_l1, xs_inverse_ids_l1 = losh_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len)# [B,H,W,C]
-            xs_scan_ids_l2, xs_inverse_ids_l2 = losh_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len)# [B,H,W,C]
-            xs_scan_ids_l3, xs_inverse_ids_l3 = losh_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len)# [B,H,W,C]
-            xs_scan_ids_lat, xs_inverse_ids_lat = losh_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len)# [B,H,W,C]
+            xs_scan_ids_l1, xs_inverse_ids_l1 = mair_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len)# [B,H,W,C]
+            xs_scan_ids_l2, xs_inverse_ids_l2 = mair_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len)# [B,H,W,C]
+            xs_scan_ids_l3, xs_inverse_ids_l3 = mair_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len)# [B,H,W,C]
+            xs_scan_ids_lat, xs_inverse_ids_lat = mair_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len)# [B,H,W,C]
 
-            xs_shift_scan_ids_l1, xs_shift_inverse_ids_l1 = losh_shift_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
-            xs_shift_scan_ids_l2, xs_shift_inverse_ids_l2 = losh_shift_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
-            xs_shift_scan_ids_l3, xs_shift_inverse_ids_l3 = losh_shift_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
-            xs_shift_scan_ids_lat, xs_shift_inverse_ids_lat = losh_shift_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+            xs_shift_scan_ids_l1, xs_shift_inverse_ids_l1 = mair_shift_ids_generate(inp_shape=(1, 1, H, W), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+            xs_shift_scan_ids_l2, xs_shift_inverse_ids_l2 = mair_shift_ids_generate(inp_shape=(1, 1, H//2, W//2), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+            xs_shift_scan_ids_l3, xs_shift_inverse_ids_l3 = mair_shift_ids_generate(inp_shape=(1, 1, H//4, W//4), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
+            xs_shift_scan_ids_lat, xs_shift_inverse_ids_lat = mair_shift_ids_generate(inp_shape=(1, 1, H//8, W//8), scan_len=self.scan_len, shift_len=self.scan_len//2)# [B,H,W,C]
             if torch.cuda.is_available():
                 ids_l1 = (xs_scan_ids_l1.cuda(), xs_inverse_ids_l1.cuda(), xs_shift_scan_ids_l1.cuda(), xs_shift_inverse_ids_l1.cuda())
                 ids_l2 = (xs_scan_ids_l2.cuda(), xs_inverse_ids_l2.cuda(), xs_shift_scan_ids_l2.cuda(), xs_shift_inverse_ids_l2.cuda())

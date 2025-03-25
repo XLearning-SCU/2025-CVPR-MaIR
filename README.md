@@ -108,7 +108,7 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] Update MaIR+
 * [x] update training and testing commands
 * [X] update unet-version
-* [ ] Improve codes of calculating FLOPs and Params.
+* [X] Improve codes of calculating FLOPs and Params.
 * [ ] update readme
 * [ ] update environments
 * [ ] update homepage

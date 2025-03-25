@@ -3,20 +3,6 @@ import torch
 from einops import rearrange
 import numpy as np
 
-def time_it(func):
-    """
-    装饰器函数，用于测量并打印另一个函数的运行时间。
-    """
-    def wrapper(*args, **kwargs):
-        start_time = time.time()  # 记录开始时间
-        result = func(*args, **kwargs)  # 调用原始函数
-        end_time = time.time()  # 记录结束时间
-        run_time = end_time - start_time  # 计算运行时间
-        print(f"函数 {func.__name__} 的运行时间为：{run_time:.6f} 秒")
-        return result
-    return wrapper
-    
-
 def test_crop_by_horz(inp, scan_len):
     # Flip the return way
     split_inp = rearrange(inp, "h (d1 w) -> d1 h w ", w=scan_len)
@@ -171,72 +157,16 @@ def sscan_4d(inp, scan_len, shift_len=0, fix_ending=True, use_einops=False):
     # print(xs)
     return xs
 
-def restore_square(out_y, out_idx, shape):
-    '''
-        out_y: (B, K, C, L)
-        out_idx: (B, K, C, L)
-    '''
-    B, K, _, L = out_y.shape
-    inp_b, inp_c, inp_h, inp_w = shape
-
-    out_y, out_idx = out_y.reshape(B, K, -1), out_idx.reshape(B, K, -1)
-    print()
-
-    # y1 = torch.gather(out_y[:, 0, :].reshape(-1), 0, out_idx[:, 0, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    # y2 = torch.gather(out_y[:, 1, :].reshape(-1), 0, out_idx[:, 1, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    # y3 = torch.gather(out_y[:, 2, :].reshape(-1), 0, out_idx[:, 2, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    # y4 = torch.gather(out_y[:, 3, :].reshape(-1), 0, out_idx[:, 3, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-
-    # y1 = torch.take(out_y[:, 0, :].reshape(-1), out_idx[:, 0, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    # y2 = torch.take(out_y[:, 1, :].reshape(-1), out_idx[:, 1, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    # y3 = torch.take(out_y[:, 2, :].reshape(-1), out_idx[:, 2, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    # y4 = torch.take(out_y[:, 3, :].reshape(-1), out_idx[:, 3, :].reshape(-1)).reshape(inp_b, inp_c, inp_h, inp_w)
-
-    # y1 = out_y[:, 0, :].reshape(-1)[out_idx[:, 0, :].reshape(-1)].reshape(inp_b, inp_c, inp_h, inp_w)
-    # y2 = out_y[:, 1, :].reshape(-1)[out_idx[:, 1, :].reshape(-1)].reshape(inp_b, inp_c, inp_h, inp_w)
-    # y3 = out_y[:, 2, :].reshape(-1)[out_idx[:, 2, :].reshape(-1)].reshape(inp_b, inp_c, inp_h, inp_w)
-    # y4 = out_y[:, 3, :].reshape(-1)[out_idx[:, 3, :].reshape(-1)].reshape(inp_b, inp_c, inp_h, inp_w)
-
-    # y1 = out_y[:, 0, :].reshape(-1)[torch.argsort(out_idx[:, 0, :].reshape(-1), dim=1)].reshape(inp_b, inp_c, inp_h, inp_w)
-    # y2 = out_y[:, 1, :].reshape(-1)[torch.argsort(out_idx[:, 1, :].reshape(-1), dim=0)].reshape(inp_b, inp_c, inp_h, inp_w)
-    # y3 = out_y[:, 2, :].reshape(-1)[torch.argsort(out_idx[:, 2, :].reshape(-1), dim=0)].reshape(inp_b, inp_c, inp_h, inp_w)
-    # y4 = out_y[:, 3, :].reshape(-1)[torch.argsort(out_idx[:, 3, :].reshape(-1), dim=0)].reshape(inp_b, inp_c, inp_h, inp_w)
-
-    print(torch.argsort(out_idx[:, 0, :].reshape(B,-1), dim=1).shape)
-
-    y1 = torch.gather(out_y[:, 0, :].reshape(B, -1), -1, torch.argsort(out_idx[:, 0, :].reshape(B, -1), dim=1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    y2 = torch.gather(out_y[:, 1, :].reshape(B, -1), -1, torch.argsort(out_idx[:, 1, :].reshape(B, -1), dim=1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    y3 = torch.gather(out_y[:, 2, :].reshape(B, -1), -1, torch.argsort(out_idx[:, 2, :].reshape(B, -1), dim=1)).reshape(inp_b, inp_c, inp_h, inp_w)
-    y4 = torch.gather(out_y[:, 3, :].reshape(B, -1), -1, torch.argsort(out_idx[:, 3, :].reshape(B, -1), dim=1)).reshape(inp_b, inp_c, inp_h, inp_w)
-
-
-    print(y1, '\n', y2, '\n', y3, '\n', y4)
-    # sorted_bchw = torch.gather(out_y, 0, out_idx)
-    # return sorted_bchw
-    return y1, y2, y3, y4
-
-# @time_it
 def inverse_ids_generate(origin_ids, K=4):
     '''
         Input: origin_ids: (B, K, C, L)
         Output: (B, K, C, L)
         Note: C is set to 1 for speeding up.
     '''
-    # B, K, _, L = origin_ids.shape
-    # print(origin_ids.shape)
-
-    # start = time.time()
-    # y1 = torch.argsort(origin_ids[:, 0, :].reshape(B, -1), dim=-1).reshape(B, 1, -1)
-    # # print(f"argsort函数运行时间：{time.time() - start} 秒")
-    # y2 = torch.argsort(origin_ids[:, 1, :].reshape(B, -1), dim=-1).reshape(B, 1, -1)
-    # y3 = torch.argsort(origin_ids[:, 2, :].reshape(B, -1), dim=-1).reshape(B, 1, -1)
-    # y4 = torch.argsort(origin_ids[:, 3, :].reshape(B, -1), dim=-1).reshape(B, 1, -1)
-    # inverse_ids = torch.cat((y1, y2, y3, y4), dim=1)
     inverse_ids = torch.argsort(origin_ids, dim=-1)
     return inverse_ids
 
-
-def losh_ids_generate(inp_shape, scan_len=4, K=4):
+def mair_ids_generate(inp_shape, scan_len=4, K=4):
     inp_b, inp_c, inp_h, inp_w = inp_shape
 
     # inp_idx = create_idx(1, inp_c, inp_h, inp_w)
@@ -244,14 +174,12 @@ def losh_ids_generate(inp_shape, scan_len=4, K=4):
 
     xs_scan_ids = sscan_4d(inp_idx, scan_len)[0]
 
-    # xs_scan_ids = xs_scan_ids.repeat(inp_b, 1, 1, 1)
-
     xs_inverse_ids = inverse_ids_generate(xs_scan_ids, K=K)
 
     return xs_scan_ids, xs_inverse_ids
 
 
-def losh_shift_ids_generate(inp_shape, scan_len=4, shift_len=0, K=4):
+def mair_shift_ids_generate(inp_shape, scan_len=4, shift_len=0, K=4):
     inp_b, inp_c, inp_h, inp_w = inp_shape
 
     # create_idx函数运行时间：0.0050699710845947266 秒
@@ -275,21 +203,14 @@ def losh_shift_ids_generate(inp_shape, scan_len=4, shift_len=0, K=4):
     return xs_scan_ids, xs_inverse_ids
 
 
-def losh_ids_scan(inp, xs_scan_ids, bkdl=False, K=4):
+def mair_ids_scan(inp, xs_scan_ids, bkdl=False, K=4):
     '''
         inp: B, C, H, W
         xs_scan_ids: K, 1, L
     '''
     B, C, H, W = inp.shape
     L = H * W
-    # xs_scan_ids_rp = xs_scan_ids.repeat(B, 1, C, 1) # B, K, C, L
     xs_scan_ids = xs_scan_ids.reshape(K, L)
-    # print(inp.shape, xs_scan_ids.shape)
-
-    # y1 = torch.gather(inp.reshape(B, C, -1), -1, xs_scan_ids_rp[:, 0, :]).unsqueeze(1) # b1dl
-    # y2 = torch.gather(inp.reshape(B, C, -1), -1, xs_scan_ids_rp[:, 1, :]).unsqueeze(1)
-    # y3 = torch.gather(inp.reshape(B, C, -1), -1, xs_scan_ids_rp[:, 2, :]).unsqueeze(1)
-    # y4 = torch.gather(inp.reshape(B, C, -1), -1, xs_scan_ids_rp[:, 3, :]).unsqueeze(1)
 
     y1 = torch.index_select(inp.reshape(B, 1, C, -1), -1, xs_scan_ids[0])
     y2 = torch.index_select(inp.reshape(B, 1, C, -1), -1, xs_scan_ids[1])
@@ -302,21 +223,14 @@ def losh_ids_scan(inp, xs_scan_ids, bkdl=False, K=4):
         inp_flatten = torch.cat((y1, y2, y3, y4), dim=1).reshape(B, 4, -1)
     return inp_flatten
 
-
-def losh_ids_inverse(inp, xs_scan_ids, shape=None):
+def mair_ids_inverse(inp, xs_scan_ids, shape=None):
     '''
         inp: (B, K, -1, L)
         xs_scan_ids: (1, K, 1, L)
     '''
     B, K, _, L = inp.shape
     xs_scan_ids = xs_scan_ids.reshape(K, L)
-    # print(inp.shape, xs_scan_ids.shape)
-    # print(inp.shape, xs_scan_ids.shape, xs_scan_ids[:, 0, :].shape)
     if not shape:
-        # y1 = torch.gather(inp[:, 0, :], -1, xs_scan_ids_rp[:, 0, :]).reshape(B, -1, L)
-        # y2 = torch.gather(inp[:, 1, :], -1, xs_scan_ids_rp[:, 1, :]).reshape(B, -1, L)
-        # y3 = torch.gather(inp[:, 2, :], -1, xs_scan_ids_rp[:, 2, :]).reshape(B, -1, L)
-        # y4 = torch.gather(inp[:, 3, :], -1, xs_scan_ids_rp[:, 3, :]).reshape(B, -1, L)
         y1 = torch.index_select(inp[:, 0, :], -1, xs_scan_ids[0]).reshape(B, -1, L)
         y2 = torch.index_select(inp[:, 1, :], -1, xs_scan_ids[1]).reshape(B, -1, L)
         y3 = torch.index_select(inp[:, 2, :], -1, xs_scan_ids[2]).reshape(B, -1, L)
@@ -327,80 +241,8 @@ def losh_ids_inverse(inp, xs_scan_ids, shape=None):
         y2 = torch.index_select(inp[:, 1, :], -1, xs_scan_ids[1]).reshape(B, -1, H, W)
         y3 = torch.index_select(inp[:, 2, :], -1, xs_scan_ids[2]).reshape(B, -1, H, W)
         y4 = torch.index_select(inp[:, 3, :], -1, xs_scan_ids[3]).reshape(B, -1, H, W)
-        # print(y.shape)
-        # del xs_scan_ids
     return torch.cat((y1,y2,y3,y4), dim=1)
-    # y = torch.cat((y1,y2,y3,y4), dim=1)
-    # return y.chunk(4,dim=1)
-    # return y1,y2,y3,y4
 
-def straight_way():
-    scan_len = 3
-    inp_b, inp_c, inp_h, inp_w = 2, 3, 4, 4
-    inp_idx = create_idx(inp_b, inp_c, inp_h, inp_w)
-    inp = chw_4d(1, inp_c, inp_h, inp_w, random=False)
-
-    print(inp)
-    # xs, xs_idx = sscan_4d(inp, inp_idx, scan_len)
-    xs = sscan_4d(inp, scan_len)
-    xs_idx = sscan_4d(inp_idx, scan_len)
-
-    print(xs)
-    print("xs_idx:", xs_idx)
-    y1, y2, y3, y4 = restore_square(xs, xs_idx, shape=(inp_b, inp_c, inp_h, inp_w))
-    # print(restored)
-
-def ids_guided_way():
-    scan_len = 3
-    inp_b, inp_c, inp_h, inp_w = 3, 2, 4, 4
-    inp = chw_4d(inp_b, inp_c, inp_h, inp_w, random=False)
-    print(inp)
-
-    xs_scan_ids, xs_inverse_ids = losh_ids_generate(inp.shape, scan_len=scan_len, K=4)
-
-    xs = losh_ids_scan(inp, xs_scan_ids)
-    print(xs)
-    # print(xs.shape)
-    xs = xs.reshape(inp_b, 4, -1, inp_h * inp_w)
-    # print("xs_idx:", xs_idx)
-    inp_flatten = losh_ids_inverse(xs, xs_inverse_ids)
-
-    print(inp_flatten)
-    # print(inp_flatten.shape)
-    # print(restored)
-
-def shift_ids_guided_way():
-    scan_len = 3
-    shift_len = 0
-    inp_b, inp_c, inp_h, inp_w = 2, 90, 500, 500 
-    inp = chw_4d(inp_b, inp_c, inp_h, inp_w, random=False)
-    print("inp:", inp)
-
-    # Original
-    # xs_scan_ids, xs_inverse_ids = losh_ids_generate(inp.shape, scan_len=scan_len, K=4)
-    # LoSS
-    xs_shift_scan_ids, xs_shift_inverse_ids = losh_shift_ids_generate(inp.shape, scan_len=scan_len, shift_len=shift_len, K=4)
-
-    # xs = losh_ids_scan(inp, xs_scan_ids)
-    # print(xs)
-    # # print(xs.shape)
-    # xs = xs.reshape(inp_b, 4, -1, inp_h * inp_w)
-    # # print("xs_idx:", xs_idx)
-    # inp_flatten = losh_ids_inverse(xs, xs_inverse_ids)
-
-    xs = losh_ids_scan(inp, xs_shift_scan_ids)
-    print("Extracted 4 path:", xs)
-    # print(xs.shape)
-    xs = xs.reshape(inp_b, 4, -1, inp_h * inp_w)
-    # print("xs_idx:", xs_idx)
-    # inp_flatten = losh_ids_inverse(xs, xs_shift_inverse_ids, shape=(inp_b, inp_c, inp_h, inp_w))
-    inp_flatten = losh_ids_inverse(xs, xs_shift_inverse_ids)
-    
-    print("recovered input:")
-    for i in range(len(inp_flatten)):
-        print(inp_flatten[i])
-        # print(inp_flatten[i].shape)
-    # print(inp_flatten.shape)
 
 def test_time():
     scan_len = 4
@@ -411,43 +253,20 @@ def test_time():
     print("inp:", inp_rgb)
 
     # Original
-    xs_scan_ids, xs_inverse_ids = losh_ids_generate(inp.shape, scan_len=scan_len, K=4)
-    xs = losh_ids_scan(inp_rgb, xs_scan_ids, bkdl=True)
-    inp_flatten = losh_ids_inverse(xs, xs_inverse_ids)
+    xs_scan_ids, xs_inverse_ids = mair_ids_generate(inp.shape, scan_len=scan_len, K=4)
+    xs = mair_ids_scan(inp_rgb, xs_scan_ids, bkdl=True)
+    inp_flatten = mair_ids_inverse(xs, xs_inverse_ids, shape=(inp_b, inp_c, inp_h, inp_w))
 
-    # LoSS
-    # xs_shift_scan_ids, xs_shift_inverse_ids = losh_shift_ids_generate(inp.shape, scan_len=scan_len, shift_len=shift_len, K=4)
-    # xs = losh_ids_scan(inp_rgb, xs_shift_scan_ids, bkdl=True)
-    # print(xs.shape)
-    # print(xs)
-    # inp_flatten = losh_ids_inverse(xs, xs_shift_inverse_ids, shape=(inp_b, inp_c, inp_h, inp_w))
-    inp_flatten = inp_flatten.chunk(4,dim=1)
+    inp_flatten = inp_flatten.chunk(4, dim=1)
     print("recovered input:")
-    # print(inp_flatten)
     for i in range(len(inp_flatten)):
         print("inp_flatten:", i)
         print(inp_flatten[i])
-
-    # print(xs)
-    # print(xs.shape)
-    # xs = xs.reshape(inp_b, 4, -1, inp_h * inp_w)
-    # print("xs_idx:", xs_idx)
-    # inp_flatten = losh_ids_inverse(xs, xs_shift_inverse_ids)
-    
-    # for i in range(len(inp_flatten)):
-    #     print(inp_flatten[i])
-    #     print(inp_flatten[i].shape)
-    # print(inp_flatten.shape)
     print("end")
 
 
 if __name__ == '__main__':
     # torch.set_default_device(1)
-    torch.cuda.set_device(7)
-
-    # shift_ids_guided_way()
-    # ids_guided_way()
-
     start_time = time.time()
     result = test_time()
     end_time = time.time()

@@ -3,20 +3,6 @@ import torch
 from einops import rearrange
 import numpy as np
 
-def time_it(func):
-    """
-    装饰器函数，用于测量并打印另一个函数的运行时间。
-    """
-    def wrapper(*args, **kwargs):
-        start_time = time.time()  # 记录开始时间
-        result = func(*args, **kwargs)  # 调用原始函数
-        end_time = time.time()  # 记录结束时间
-        run_time = end_time - start_time  # 计算运行时间
-        print(f"函数 {func.__name__} 的运行时间为：{run_time:.6f} 秒")
-        return result
-    return wrapper
-    
-
 def test_crop_by_horz(inp, scan_len):
     # Flip the return way
     split_inp = rearrange(inp, "h (d1 w) -> d1 h w ", w=scan_len)
@@ -171,7 +157,6 @@ def sscan_4d(inp, scan_len, shift_len=0, fix_ending=True, use_einops=False):
     # print(xs)
     return xs
 
-# @time_it
 def inverse_ids_generate(origin_ids, K=4):
     '''
         Input: origin_ids: (B, K, C, L)

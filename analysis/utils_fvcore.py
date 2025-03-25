@@ -179,9 +179,13 @@ class FLOPs:
             inputs = (torch.randn(input_shape).to(next(model.parameters()).device),)
 
         model.eval()
+        
+        print("model Prepared")
 
         Gflops, unsupported = flop_count(model=model, inputs=inputs, supported_ops=supported_ops)
 
+        print("flop_count Done")
+        
         flops_table = flop_count_table(
             flops=FlopCountAnalysis(model, inputs).set_op_handle(**supported_ops),
             max_depth=100,
