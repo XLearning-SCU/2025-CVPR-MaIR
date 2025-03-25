@@ -1,0 +1,58 @@
+name: test_MaIR-ITS-SOTS
+model_type: ImageCleanModel
+scale: 1
+num_gpu: 2  # set num_gpu: 0 for cpu mode
+manual_seed: 100
+
+# dataset and data loader settings
+datasets:
+  test_1: 
+    name: SOTS-Indoor
+    type: Dehaze_Dataset
+    dataroot_gt:  /xlearning/boyun/datasets/Test/SOTS-indoor/gt
+    dataroot_lq:  /xlearning/boyun/datasets/Test/SOTS-indoor/hazy
+    io_backend:
+      type: disk
+
+# network structures
+network_g:
+  type: MaIRUNet
+  inp_channels: 3
+  out_channels: 3
+  dim: 24
+  num_blocks: [2, 2, 3, 4]
+  num_refinement_blocks: 2
+
+  ssm_ratio: 1.2 
+  flp_ratio: 2.0 
+  mlp_ratio: 2.0 
+  bias: False
+  dual_pixel_task: False
+
+  img_size: 256
+  scan_len: 8
+  batch_size: 6
+  dynamic_ids: False
+
+# path
+path:
+  pretrain_network_g: ckpt/MaIR_DH_ITS.pth
+  strict_load_g: true
+
+# validation settings
+val:
+  window_size: 8
+  save_img: true
+  rgb2bgr: true
+  use_image: false
+  max_minibatch: 8
+
+  metrics:
+    psnr: # metric name, can be arbitrary
+      type: calculate_psnr
+      crop_border: 0
+      test_y_channel: false
+    ssim: # metric name, can be arbitrary
+      type: calculate_ssim
+      crop_border: 0
+      test_y_channel: false
