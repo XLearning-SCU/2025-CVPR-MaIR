@@ -12,10 +12,40 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 
 ## Guidance for Training and Testing
 
-### Training and Testing on Color Image Denoising
+### Training and Testing Commands on Super-Resolution
 
 ```bash
-# Training commands for Color Denoising with sigma=15
+# Training commands for x2, x3, x4 Classic SR (~1 week for x2 SR)
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_SR_x2.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_SR_x3.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_SR_x4.yml --launcher pytorch
+# Training commands for small version of x2, x3, x4 lightSR (~1.3M) (~3 days)
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_S_lightSR_x2.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_S_lightSR_x3.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_S_lightSR_x4.yml --launcher pytorch
+# Training commands for tiny version of x2, x3, x4 lightSR (<900K) (~3 days)
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_T_lightSR_x2.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_T_lightSR_x3.yml --launcher pytorch
+CUDA_VISIBLE_DEVICES=0,1 torchrun --nproc_per_node=2 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_T_lightSR_x4.yml --launcher pytorch
+
+# Testing commands for x2, x3, x4 Classic SR
+python basicsr/test.py -opt options/test/test_MaIR_SR_x2.yml
+python basicsr/test.py -opt options/test/test_MaIR_SR_x3.yml
+python basicsr/test.py -opt options/test/test_MaIR_SR_x4.yml
+# Testing commands for small version of x2, x3, x4 lightSR (~1.3M)
+python basicsr/test.py -opt options/test/test_MaIR_S_lightSR_x2.yml
+python basicsr/test.py -opt options/test/test_MaIR_S_lightSR_x3.yml
+python basicsr/test.py -opt options/test/test_MaIR_S_lightSR_x4.yml
+# Testing commands for tiny version of x2, x3, x4 lightSR (<900K)
+python basicsr/test.py -opt options/test/test_MaIR_T_lightSR_x2.yml
+python basicsr/test.py -opt options/test/test_MaIR_T_lightSR_x3.yml
+python basicsr/test.py -opt options/test/test_MaIR_T_lightSR_x4.yml
+```
+
+### Training and Testing Commands on Color Image Denoising
+
+```bash
+# Training commands for Color Denoising with sigma=15  (~2 weeks)
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s15.yml --launcher pytorch
 # Training commands for Color Denoising with sigma=25
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s25.yml --launcher pytorch
@@ -29,6 +59,18 @@ python basicsr/test.py -opt options/test/test_MaIR_CDN_s25.yml
 # Testing commands for Color Denoising with sigma=50
 python basicsr/test.py -opt options/test/test_MaIR_CDN_s50.yml
 ```
+
+
+### Training and Testing Commands on Motion Debluring
+
+```bash
+# Training commands for Motion Debluring (~1 week)
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 realDenoising/basicsr/trainF.py -opt realDenoising/options/train/train_MaIR_MotionDeblur.yml --launcher pytorch
+
+# Testing commands for Motion Debluring
+python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_MotionDeblur.yml
+```
+
 
 Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to use torchrun for training, you can replace it with `python -m torch.distributed.launch` for training.
 
