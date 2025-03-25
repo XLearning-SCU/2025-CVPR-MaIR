@@ -13,14 +13,8 @@ from typing import Optional, Callable
 from einops import rearrange, repeat
 from functools import partial
 import sys
-# sys.path.append('/xlearning/boyun/codes/MaIR/realDenoising')
-# try:
-# sys.path.remove('/hdd/boyun/codes/MambaIR')
 sys.path.append('/xlearning/boyun/codes/MaIR/realDenoising')
-# from basicsr.models.archs.shift_scanf_util import losh_ids_generate, losh_ids_scan, losh_ids_inverse, losh_shift_ids_generate
-# except:
 from shift_scanf_util import losh_ids_generate, losh_ids_scan, losh_ids_inverse, losh_shift_ids_generate
-# from realDenoising.basicsr.models.archs.shift_scan_util import losh_ids_generate, losh_ids_scan, losh_ids_inverse, losh_shift_ids_generate
 
 NEG_INF = -1000000
 
@@ -806,7 +800,7 @@ if __name__ == '__main__':
     #     bias=False,
     #     dual_pixel_task=False,
     #     img_size=128,
-    #     scan_len=8,
+    #     scan_len=4,
     # ).cuda()
 
     height = 256

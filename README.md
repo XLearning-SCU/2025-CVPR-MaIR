@@ -14,8 +14,13 @@ CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyyn
 
 ### Training and Testing on Color Image Denoising
 
-```
+```bash
+# Training commands for Color Denoising with sigma=15
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s15.yml --launcher pytorch
+# Training commands for Color Denoising with sigma=25
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s25.yml --launcher pytorch
+# Training commands for Color Denoising with sigma=50
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 torchrun --nproc_per_node=8 --master_port=1268 basicsr/trainF.py -opt options/train/train_MaIR_CDN_s50.yml --launcher pytorch
 ```
 
 Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to use torchrun for training, you can replace it with `python -m torch.distributed.launch` for training.
@@ -30,11 +35,12 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] update options for SR
 * [X] update options for lightSR
 * [X] update options for denoising
-* [ ] update options for deblurring
+* [ ] update options for realDN
+* [X] update options for deblurring
 * [ ] update options for dehazing
 * [X] Update MaIR+
 * [ ] update training and testing commands
-* [ ] update unet-version
+* [X] update unet-version
 * [ ] update readme
 * [ ] update environments
 * [ ] update homepage
