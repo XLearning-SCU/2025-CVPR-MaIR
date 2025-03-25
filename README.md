@@ -11,11 +11,13 @@ There are the codes of MaIR. I will reformulate codes and options very very soon
 CKPT can be referred at [here](https://drive.google.com/drive/folders/1YYmIVTyynLg-Kfu-mviq24WdVkJu-S3M?usp=sharing).
 
 ## Environment & Dependencies
+
 To ensure seamless execution of our project, the following dependencies are required:
+
 * Python == 3.8.11
 * Pytorch == 2.0.1
 * cudatoolkit == 11.0.221
-  
+
 To leverage the SSO, the mamba_ssm library is needed to install with the folllowing command:
 
 ```bash
@@ -24,12 +26,26 @@ pip install mamba_ssm==1.0.1
 ```
 
 We also export our conda virtual environment as environment.yaml. You can use the following command to create the environment.
+
 ```bash
 conda env create -f environment.yaml
 ```
+
 This ensures all dependencies are correctly installed, allowing you to focus on running and experimenting with the code.
 
-## Guidance for Training and Testing
+## Datasets
+
+The datasets used in our training and testing are orgnized as follows:
+
+| Task                           | Training Set                                                                                                                                                                                                                                                                                                                                                                                                                         |                                                                              Testing Set                                                                              | Visual Results |
+| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------: | :------------: |
+| Image SR                       | LightSR:[DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)<br />SR:[DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)+  [Flickr2K](https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar) [complete DF2K [download](https://drive.google.com/file/d/1TubDkirxl4qAWelfOnpwaSKoj3KLAIG4/view?usp=share_link)]                                                                                                                                          |               Set5 + Set14 + BSD100 + Urban100 + Manga109 [[download](https://drive.google.com/file/d/1n-7pmwjP0isZBK7w3tx2y8CTastlABx1/view?usp=sharing)]               |  Coming Soon  |
+| Gaussian Color Image Denoising | [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/) +  [Flickr2K](https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar) + [BSD400](http://www.eecs.berkeley.edu/Research/Projects/CS/vision/grouping/BSR/BSR_bsds500.tgz) + [WED](http://ivc.uwaterloo.ca/database/WaterlooExploration/exploration_database_and_code.rar) <br />[complete DFWB_RGB [download](https://drive.google.com/file/d/1jPgG_URDQZ4kyXaMMXJ8AZ8jEErCdKuM/view?usp=share_link)] |                 CBSD68 + Kodak24 + McMaster + Urban100  [[download](https://drive.google.com/file/d/1baLpOjNlTCNbREUDAZf9Lso6YCeUOQER/view?usp=sharing)]                 |  Coming Soon  |
+| Real Image Denoising           | [SIDD](https://www.eecs.yorku.ca/~kamel/sidd/) [complete SIDD [download](https://drive.google.com/drive/folders/1L_8ig1P71ikzf8PHGs60V6dZ2xoCixaC?usp=share_link)]                                                                                                                                                                                                                                                                        |                              SIDD + DND [[download](https://drive.google.com/file/d/1Vuu0uhm_-PAG-5UPI0bPIaEjSfrSvsTO/view?usp=share_link)]                              |  Coming Soon  |
+| Image Deblurring               | [GoPro-Train](https://drive.google.com/file/d/1zgALzrLCC_tcXKu_iHQTHukKUVT1aodI/view) (2103 training images)                                                                                                                                                                                                                                                                                                                            | [GoPro](https://drive.google.com/file/d/1abXSfeRGrzj2mQ2n2vIBHtObU6vXvr7C/view) + [HIDE](https://drive.google.com/file/d/1XRomKYJF1H92g1EuD06pCQe4o6HlwB7A/view?usp=sharing) |  Coming Soon  |
+| Image Dehazing                 | Indoor & Outdoor:[RESIDE](https://sites.google.com/view/reside-dehaze-datasets/reside-standard?authuser=0) (including 13990 indoor and 313950 outdoor images)<br />Mix: RESIDE-6K  (6000 images) <br />[Training Set [download](https://drive.google.com/drive/folders/1oaQSpdYHxEv-nMOB7yCLKfw2NDCJVtrx)]                                                                                                                               |                                 SOTS / RESIDE-Mix [[download](https://drive.google.com/drive/folders/1oaQSpdYHxEv-nMOB7yCLKfw2NDCJVtrx)]                                 |  Coming Soon  |
+
+## Commands
 
 ### Training and Testing Commands on Super-Resolution
 
@@ -83,7 +99,6 @@ python basicsr/test.py -opt options/test/test_MaIR_CDN_s50.yml
 python basicsr/test.py -opt options/test/test_MaIR_RealDN.yml
 ```
 
-
 ### Training and Testing Commands on Motion Debluring
 
 ```bash
@@ -108,7 +123,6 @@ python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_O
 python realDenoising/basicsr/test.py -opt realDenoising/options/test/test_MaIR_R6K.yml
 ```
 
-
 Cautions: torchrun is only available for pytorch>=1.9.0. If you do not want to use torchrun for training, you can replace it with `python -m torch.distributed.launch` for training.
 
 For MaIR+: You could change the model_type in test options to MaIRPlusModel for MaIR+.
@@ -125,10 +139,10 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] update options for deblurring
 * [X] update options for dehazing
 * [X] Update MaIR+
-* [x] update training and testing commands
+* [X] update training and testing commands
 * [X] update unet-version
 * [X] Improve codes of calculating FLOPs and Params.
-* [ ] update readme
+* [X] update readme
 * [X] update environments
 * [ ] update homepage
 
@@ -149,7 +163,7 @@ If our work is useful for your research, please consider citing:
 
 ## Acknowledgement
 
-This code is based on [MambaIR](https://github.com/csguoh/MambaIR/) and [VMamba](https://github.com/MzeroMiko/VMamba). Many thanks for their awesome work.
+This code and README is based on [MambaIR](https://github.com/csguoh/MambaIR/) and [VMamba](https://github.com/MzeroMiko/VMamba). Many thanks for their awesome work.
 
 ## Contact
 
