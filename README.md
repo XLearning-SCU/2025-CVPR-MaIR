@@ -44,7 +44,7 @@ For MaIR+: You could change the model_type in test options to MaIRPlusModel for 
 * [X] update options for denoising
 * [X] update options for realDN
 * [X] update options for deblurring
-* [ ] update options for dehazing
+* [X] update options for dehazing
 * [X] Update MaIR+
 * [ ] update training and testing commands
 * [X] update unet-version
