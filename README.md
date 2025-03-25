@@ -1,6 +1,7 @@
 # [CVPR 2025] MaIR: A Locality- and Continuity-Preserving Mamba for Image Restoration
 
-[[Paper](https://arxiv.org/abs/2412.20066)]
+[[Paper](https://arxiv.org/abs/2412.20066)] [[Pretrained Models](https://drive.google.com/drive/folders/1YYmIVTyynLg-Kfu-mviq24WdVkJu-S3M?usp=sharing)]
+
 
 [Boyun Li](https://liboyun.github.io/), [Haiyu Zhao](https://pandint.github.io/), [Wenxin Wang](https://hi-wenxin.github.io/), [Peng Hu](https://penghu-cs.github.io/), [Yuanbiao Gou](https://ybgou.github.io/)\*, [Xi Peng](https://pengxi.me/)\*
 

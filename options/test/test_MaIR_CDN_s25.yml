@@ -1,5 +1,5 @@
 # general settings
-name: test_MaIR_CDN_s15
+name: test_MaIR_CDN_s25
 model_type: MambaIRModel # MaIRPlusModel for MaIR+
 scale: 1
 num_gpu: 8
@@ -10,7 +10,7 @@ datasets:
     name: McMaster
     type: PairedImageDataset
     task: denoising_color
-    noise: 15
+    noise: 25
     dataroot_gt: /xlearning/boyun/datasets/Test/McMaster
     dataroot_lq: /xlearning/boyun/datasets/Test/McMaster
     filename_tmpl: '{}'
@@ -21,7 +21,7 @@ datasets:
     name: Kodak24
     type: PairedImageDataset
     task: denoising_color
-    noise: 15
+    noise: 25
     dataroot_gt: /xlearning/boyun/datasets/Test/Kodak24
     dataroot_lq: /xlearning/boyun/datasets/Test/Kodak24
     filename_tmpl: '{}'
@@ -32,7 +32,7 @@ datasets:
     name: CBSD68
     type: PairedImageDataset
     task: denoising_color
-    noise: 15
+    noise: 25
     dataroot_gt: /xlearning/boyun/datasets/Test/CBSD68
     dataroot_lq: /xlearning/boyun/datasets/Test/CBSD68
     filename_tmpl: '{}'
@@ -43,7 +43,7 @@ datasets:
     name: Urban100
     type: PairedImageDataset
     task: denoising_color
-    noise: 15
+    noise: 25
     dataroot_gt: /xlearning/boyun/datasets/Test/Urban100
     dataroot_lq: /xlearning/boyun/datasets/Test/Urban100
     filename_tmpl: '{}'
